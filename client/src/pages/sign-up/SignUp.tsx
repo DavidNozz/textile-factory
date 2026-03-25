@@ -1,21 +1,27 @@
 import { AuthCard } from "@/components";
 import { Button, Heading, Input, NativeSelect, Text, Link, VStack, Image } from "@chakra-ui/react";
-import { Link as RouterLink } from "react-router-dom";
+import { Link as RouterLink, useNavigate } from "react-router-dom";
 import logo from "@/assets/logo.png";
 import { useState, type SubmitEvent } from "react";
 import { toast } from "react-toastify";
 import { PASSWORD_REGEX, PERSONAL_ID_REGEX, USERNAME_REGEX } from "@/constants";
+import { useRegister } from "@/hooks/user";
+import { Gender, Role } from "@/types/user";
 
 export default function SignUp() {
+    const navigate = useNavigate();
+    const { mutate: register, isPending } = useRegister();
+
     const [form, setForm] = useState({
         personalId: "",
         name: "",
         username: "",
         password: "",
-        role: "Employee",
+        gender: Gender.MALE,
         dob: "",
-        isBlocked: false,
+        role: Role.EMPLOYEE,
         managerId: "",
+        isBlocked: false,
     });
 
     function validate() {
@@ -56,8 +62,26 @@ export default function SignUp() {
 
     function handleSubmit(e: SubmitEvent) {
         e.preventDefault();
-        if (!validate()) return;
-        toast.success("Account created successfully");
+
+        if (!validate()) {
+            return;
+        }
+
+        register(
+            {
+                ...form,
+                managerId: form.managerId || null,
+            },
+            {
+                onSuccess: (_) => {
+                    toast.success("Account created successfully");
+                    navigate("/sign-in");
+                },
+                onError: (error) => {
+                    toast.error(error.message);
+                },
+            },
+        );
     }
 
     return (
@@ -71,15 +95,23 @@ export default function SignUp() {
                     <Input placeholder="Username" value={form.username} onChange={(e) => setForm({...form, username: e.target.value})} required/>
                     <Input placeholder="Password" type="password" value={form.password} onChange={(e) => setForm({...form, password: e.target.value})} required/>
                     <NativeSelect.Root>
-                        <NativeSelect.Field value={form.role} onChange={(e) => setForm({...form, role: e.target.value})}>
-                            <option value="Employee">Employee</option>
-                            <option value="Manager">Manager</option>
-                            <option value="CEO">CEO</option>
+                        <NativeSelect.Field value={form.gender} onChange={(e) => setForm({...form, gender: e.target.value as Gender})}>
+                            {Object.values(Gender).map((genderValue) => (
+                                <option key={genderValue} value={genderValue}>{genderValue}</option>
+                            ))}
                         </NativeSelect.Field>
                         <NativeSelect.Indicator/>
                     </NativeSelect.Root>
                     <Input placeholder="Date of Birth" type="date" value={form.dob} onChange={(e) => setForm({...form, dob: e.target.value})} required/>
-                    <Button type="submit" colorPalette="blue" color="white">Sign Up</Button>
+                    <NativeSelect.Root>
+                        <NativeSelect.Field value={form.role} onChange={(e) => setForm({...form, role: e.target.value as Role})}>
+                            {Object.values(Role).map((roleValue) => (
+                                <option key={roleValue} value={roleValue}>{roleValue}</option>
+                            ))}
+                        </NativeSelect.Field>
+                        <NativeSelect.Indicator/>
+                    </NativeSelect.Root>
+                    <Button type="submit" colorPalette="blue" color="white" loading={isPending}>Sign Up</Button>
                     <Text textAlign="center">
                         Already have an account?{" "}
                         <Link as={RouterLink} to="/sign-in" color="blue.500" _focus={{ outline: "none" }}>Sign In</Link>
