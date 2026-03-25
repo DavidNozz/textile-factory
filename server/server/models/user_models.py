@@ -15,8 +15,7 @@ class Role(str, Enum):
     CEO = "CEO"
 
 
-class UserModel(BaseModel):
-    id: Optional[str] = None
+class CreateUserModel(BaseModel):
     personal_id: str
     name: str
     username: str
@@ -40,3 +39,16 @@ class UpdateUserModel(BaseModel):
     password: Optional[str] = None
     gender: Optional[Gender] = None
     dob: Optional[datetime] = None
+
+
+class UserModel(BaseModel):
+    id: Optional[str] = None
+    personal_id: str
+    name: str
+    username: str
+    password: str
+    gender: Gender
+    dob: datetime = datetime.min
+    role: Role = "Employee"
+    manager_id: Optional[str] = None
+    is_blocked: bool = False

@@ -2,13 +2,13 @@ from uuid import uuid4
 from fastapi import APIRouter, HTTPException
 from http import HTTPStatus
 from server.config.database import users_db
-from server.models.user_models import UserModel, UserCredentialsModel
+from server.models.user_models import CreateUserModel, UserCredentialsModel, UserModel
 
 user_router = APIRouter(prefix="/users")
 
 
 @user_router.post("/register", response_model=UserModel, status_code=HTTPStatus.CREATED)
-async def register_user(user: UserModel):
+async def register_user(user: CreateUserModel):
     new_user_dict = user.model_dump()
 
     for existing_user in users_db.values():
