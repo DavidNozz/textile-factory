@@ -1,27 +1,23 @@
 import { AuthCard } from "@/components";
-import { Button, Heading, Input, NativeSelect, Text, Link, VStack, Image } from "@chakra-ui/react";
-import { Link as RouterLink, useNavigate } from "react-router-dom";
-import logo from "@/assets/logo.png";
+import { useUpdateProfile } from "@/hooks/user";
+import { Gender } from "@/types/user";
+import { getCurrentUser, setCurrentUser } from "@/utils/storage/authStorage";
+import { validate } from "@/utils/validations/userValidations";
+import { Button, Heading, Input, NativeSelect, Text, VStack } from "@chakra-ui/react";
 import { useState, type SubmitEvent } from "react";
 import { toast } from "react-toastify";
-import { useRegister } from "@/hooks/user";
-import { Gender, Role } from "@/types/user";
-import { validate } from "@/utils/validations/userValidations";
 
-export default function SignUp() {
-    const navigate = useNavigate();
-    const { mutate: register, isPending } = useRegister();
+export default function Profile() {
+    const user = getCurrentUser();
+    const { mutate: updateProfile, isPending } = useUpdateProfile();
 
     const [form, setForm] = useState({
-        personalId: "",
-        name: "",
-        username: "",
-        password: "",
-        gender: Gender.MALE,
-        dob: "",
-        role: Role.EMPLOYEE,
-        managerId: "",
-        isBlocked: false,
+        personalId: user?.personalId,
+        name: user?.name,
+        username: user?.username,
+        password: user?.password,
+        gender: user?.gender,
+        dob: user?.dob.split("T")[0],
     });
 
     function handleSubmit(e: SubmitEvent) {
@@ -31,15 +27,22 @@ export default function SignUp() {
             return;
         }
 
-        register(
+        updateProfile(
             {
-                ...form,
-                managerId: form.managerId || null,
+                _id: user?.id as string,
+                payload: {
+                    personalId: form.personalId as string,
+                    name: form.name as string,
+                    username: form.username as string,
+                    password: form.password as string,
+                    gender: form.gender as Gender,
+                    dob: form.dob as string,
+                },
             },
             {
-                onSuccess: (_) => {
-                    toast.success("Account created successfully");
-                    navigate("/sign-in");
+                onSuccess: (data) => {
+                    setCurrentUser(data);
+                    toast.success("Profile updated successfully");
                 },
                 onError: (error) => {
                     toast.error(error.message);
@@ -52,8 +55,8 @@ export default function SignUp() {
         <AuthCard>
             <form onSubmit={handleSubmit}>
                 <VStack gap={4} align="stretch">
-                    <Image src={logo} boxSize="90px" mx="auto"/>
-                    <Heading size="lg" textAlign="center">Get started with Textile Factory</Heading>
+                    <Heading size="lg" textAlign="center">Profile</Heading>
+                    <Text textAlign="center" color="gray.500">Update your personal details</Text>
                     <Input placeholder="Personal ID" value={form.personalId} onChange={(e) => setForm({...form, personalId: e.target.value})} required/>
                     <Input placeholder="Full Name" value={form.name} onChange={(e) => setForm({...form, name: e.target.value})} required/>
                     <Input placeholder="Username" value={form.username} onChange={(e) => setForm({...form, username: e.target.value})} required/>
@@ -67,19 +70,7 @@ export default function SignUp() {
                         <NativeSelect.Indicator/>
                     </NativeSelect.Root>
                     <Input placeholder="Date of Birth" type="date" value={form.dob} onChange={(e) => setForm({...form, dob: e.target.value})} required/>
-                    <NativeSelect.Root>
-                        <NativeSelect.Field value={form.role} onChange={(e) => setForm({...form, role: e.target.value as Role})}>
-                            {Object.values(Role).map((roleValue) => (
-                                <option key={roleValue} value={roleValue}>{roleValue}</option>
-                            ))}
-                        </NativeSelect.Field>
-                        <NativeSelect.Indicator/>
-                    </NativeSelect.Root>
-                    <Button type="submit" colorPalette="blue" color="white" loading={isPending}>Sign Up</Button>
-                    <Text textAlign="center">
-                        Already have an account?{" "}
-                        <Link as={RouterLink} to="/sign-in" color="blue.500" _focus={{ outline: "none" }}>Sign In</Link>
-                    </Text>
+                    <Button type="submit" colorPalette="blue" color="white" loading={isPending}>Save Changes</Button>
                 </VStack>
             </form>
         </AuthCard>

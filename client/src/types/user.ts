@@ -26,6 +26,15 @@ export interface UserCredentialsModel {
     password: string
 }
 
+export interface UpdateUserModel {
+    personalId: string
+    name: string
+    username: string
+    password: string
+    gender: Gender
+    dob: string
+}
+
 export interface UserModel {
     id: string
     personalId: string

@@ -33,12 +33,12 @@ class UserCredentialsModel(BaseModel):
 
 
 class UpdateUserModel(BaseModel):
-    personal_id: Optional[str] = None
-    name: Optional[str] = None
-    username: Optional[str] = None
-    password: Optional[str] = None
-    gender: Optional[Gender] = None
-    dob: Optional[datetime] = None
+    personal_id: str
+    name: str
+    username: str
+    password: str
+    gender: Gender
+    dob: datetime
 
 
 class UserModel(BaseModel):
