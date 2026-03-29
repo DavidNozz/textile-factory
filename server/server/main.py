@@ -1,8 +1,15 @@
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
-from routers.user_router import user_router
+from server.config.database import ensure_ceo_exists
+from server.routers.user_router import user_router
 
 app = FastAPI()
+
+
+@app.on_event("startup")
+def startup_event():
+    ensure_ceo_exists()
+
 
 app.add_middleware(
     CORSMiddleware,

@@ -1,6 +1,6 @@
+from http import HTTPStatus
 from uuid import uuid4
 from fastapi import APIRouter, HTTPException
-from http import HTTPStatus
 from server.config.database import users_db
 from server.models.user_models import CreateUserModel, UserCredentialsModel, UpdateUserModel, UserModel
 
