@@ -2,7 +2,7 @@ from http import HTTPStatus
 from uuid import uuid4
 from fastapi import APIRouter, HTTPException
 from server.config.database import users_db
-from server.models.user_models import CreateUserModel, UserCredentialsModel, UpdateUserModel, UserModel
+from server.models.user_models import CreateUserModel, UserCredentialsModel, UpdateUserModel, UserModel, Role
 
 user_router = APIRouter(prefix="/users")
 
@@ -19,6 +19,10 @@ async def register_user(user: CreateUserModel):
 
     new_user_id = str(uuid4())
     new_user_dict["id"] = new_user_id
+
+    if new_user_dict["role"] in (Role.EMPLOYEE, Role.MANAGER):
+        ceo = next((user for user in users_db.values() if user["role"] == Role.CEO))
+        new_user_dict["manager_id"] = ceo["id"]
 
     users_db[new_user_id] = new_user_dict
     return new_user_dict
